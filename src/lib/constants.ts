@@ -13,25 +13,24 @@ export const KATEGORI_WO = [
   "Lainnya",
 ] as const;
 
+// Pilihan Urgensi Baru
 export const URGENSI_OPTIONS: { value: Urgensi; label: string }[] = [
-  { value: "rendah", label: "Rendah" },
-  { value: "sedang", label: "Sedang" },
-  { value: "tinggi", label: "Tinggi" },
-  { value: "kritis", label: "Kritis" },
+  { value: "mendesak", label: "Mendesak" },
+  { value: "prioritas_1", label: "Prioritas 1" },
+  { value: "prioritas_2", label: "Prioritas 2" },
 ];
 
 export const URGENSI_LABEL: Record<Urgensi, string> = {
-  rendah: "Rendah",
-  sedang: "Sedang",
-  tinggi: "Tinggi",
-  kritis: "Kritis",
+  mendesak: "Mendesak",
+  prioritas_1: "Prioritas 1",
+  prioritas_2: "Prioritas 2",
 };
 
+// Warna Badge Urgensi
 export const URGENSI_COLOR: Record<Urgensi, string> = {
-  rendah: "bg-slate-100 text-slate-700 border-slate-200",
-  sedang: "bg-blue-50 text-blue-700 border-blue-200",
-  tinggi: "bg-orange-50 text-orange-700 border-orange-200",
-  kritis: "bg-red-50 text-red-700 border-red-200",
+  mendesak: "bg-red-50 text-red-700 border-red-200",
+  prioritas_1: "bg-orange-50 text-orange-700 border-orange-200",
+  prioritas_2: "bg-blue-50 text-blue-700 border-blue-200",
 };
 
 export const STATUS_LABEL: Record<WoStatus, string> = {
@@ -50,7 +49,6 @@ export const STATUS_BADGE_CLASS: Record<WoStatus, string> = {
   closed: "bg-teal-50 text-teal-700 border-teal-300",
 };
 
-// Warna solid dipakai untuk pin marker di peta (FR-3.2)
 export const STATUS_MARKER_COLOR: Record<WoStatus, string> = {
   open: "#64748B",
   assigned: "#FBB910",
@@ -61,8 +59,8 @@ export const STATUS_MARKER_COLOR: Record<WoStatus, string> = {
 
 export const ROLE_LABEL = {
   tim_inspeksi: "Tim Inspeksi",
-  supervisor: "Pegawai",           // <-- Sudah diubah
-  tim_pemeliharaan: "Tim Eksekusi" // <-- Sudah diubah
+  supervisor: "Pegawai",
+  tim_pemeliharaan: "Tim Eksekusi"
 };
 
 export const ROLE_OPTIONS: { value: Role; label: string; deskripsi: string }[] = [

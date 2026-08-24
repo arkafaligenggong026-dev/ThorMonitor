@@ -254,3 +254,71 @@ export async function verifyWorkOrder(
   revalidatePath("/dashboard/work-orders");
   return { success: true, message: "Dikembalikan ke Tim Pemeliharaan untuk revisi." };
 }
+
+// ============================================================================
+// FITUR KHUSUS QA & INSPEKSI ROW (PEGAWAI)
+// ============================================================================
+
+export interface BuatQaInput {
+  minggu_ke: number;
+  inspektor: string;
+  kms: string;
+  rencana_tindak: string;
+  nama_penyulang: string;
+  urgensi: string;
+  latitude: number;
+  longitude: number;
+  alamat: string | null;
+  foto_before_url: string;
+}
+
+/**
+ * Pegawai membuat laporan QA khusus ROW.
+ * Mirip dengan WO, tapi Jenis Inspeksi di-hardcode "ROW" dan punya data ekstra.
+ */
+export async function createQaInspeksi(input: BuatQaInput): Promise<ActionResult> {
+  const { supabase, user, profile } = await getUserAndProfile();
+
+  if (!user || !profile) return { success: false, message: "Sesi tidak valid, silakan masuk kembali." };
+  
+  // Keamanan ganda: Hanya Pegawai yang boleh eksekusi ini
+  if (profile.role !== "supervisor") {
+    return { success: false, message: "Hanya Pegawai yang dapat membuat laporan QA & Inspeksi." };
+  }
+  
+  if (!input.minggu_ke || !input.inspektor || !input.kms || !input.rencana_tindak || !input.nama_penyulang || !input.urgensi) {
+    return { success: false, message: "Mohon lengkapi semua kolom QA." };
+  }
+  if (!input.foto_before_url) {
+    return { success: false, message: "Foto kondisi awal (Before) wajib diunggah." };
+  }
+
+  // Gunakan deskripsi otomatis agar seragam
+  const deskripsiOtomatis = `QA Inspeksi ROW - Minggu Ke-${input.minggu_ke} | Inspektor: ${input.inspektor} | KMS: ${input.kms}`;
+
+  const { error } = await supabase.from("work_orders").insert({
+    kategori: "ROW", // Langsung tembak ROW secara mutlak
+    nama_penyulang: input.nama_penyulang,
+    deskripsi: deskripsiOtomatis,
+    urgensi: input.urgensi,
+    latitude: input.latitude,
+    longitude: input.longitude,
+    alamat: input.alamat,
+    foto_before_url: input.foto_before_url,
+    status: "open",
+    dibuat_oleh: user.id,
+    
+    // Simpan data khusus QA
+    minggu_ke: input.minggu_ke,
+    inspektor: input.inspektor,
+    kms: input.kms,
+    rencana_tindak: input.rencana_tindak,
+  });
+
+  if (error) return { success: false, message: `Gagal menyimpan QA: ${error.message}` };
+
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/qa-inspeksi");
+  revalidatePath("/dashboard/peta");
+  return { success: true, message: "Laporan QA & Inspeksi berhasil disimpan." };
+}

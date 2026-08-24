@@ -43,16 +43,17 @@ export default function LandingPage() {
     <div className="flex min-h-screen flex-col bg-slate-50">
       <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            {/* Menggunakan Logo Horizontal (Landscape) */}
             <Image
               src="/6594c76535ef0-pln.png"
               alt="Logo PLN"
-              width={36}
+              width={140}
               height={48}
-              className="h-10 w-auto object-contain"
+              className="h-10 w-auto object-contain drop-shadow-sm"
               priority
             />
-            <span className="text-lg font-bold tracking-tight text-slate-800">
+            <span className="text-xl font-extrabold tracking-tight text-slate-800">
               {APP_NAME}
             </span>
           </div>

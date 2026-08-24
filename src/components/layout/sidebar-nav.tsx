@@ -7,8 +7,7 @@ import { LogOut } from "lucide-react";
 import { NAV_ITEMS } from "./nav-items";
 import { cn } from "@/lib/utils";
 import { logoutAction } from "@/lib/actions/auth";
-import { APP_NAME } from "@/lib/constants";
-import { ROLE_LABEL } from "@/lib/constants";
+import { APP_NAME, ROLE_LABEL } from "@/lib/constants";
 import type { Role } from "@/lib/types";
 
 export function SidebarNav({ nama, role }: { nama: string; role: Role }) {
@@ -16,13 +15,13 @@ export function SidebarNav({ nama, role }: { nama: string; role: Role }) {
 
   return (
     <aside className="hidden md:flex md:w-64 md:flex-col md:border-r md:border-slate-200 md:bg-white/80 md:backdrop-blur-xl">
-      {/* Header Sidebar (Logo) */}
+      {/* Header Sidebar (Menggunakan Logo Horizontal) */}
       <div className="flex h-16 items-center gap-3 border-b border-slate-100 px-6">
         <Image
           src="/6594c76535ef0-pln.png"
           alt="Logo PLN"
-          width={32}
-          height={42}
+          width={120}
+          height={40}
           className="h-8 w-auto object-contain drop-shadow-sm"
           priority
         />
@@ -34,6 +33,10 @@ export function SidebarNav({ nama, role }: { nama: string; role: Role }) {
       {/* Menu Navigasi */}
       <nav className="flex-1 space-y-1.5 px-3 py-6">
         {NAV_ITEMS.map((item) => {
+          
+          // CEK ROLE: Jika menu punya batasan role (seperti menu QA), dan role user saat ini tidak ada di daftar tersebut, maka sembunyikan!
+          if (item.roles && !item.roles.includes(role)) return null;
+
           const active =
             item.href === "/dashboard" ? pathname === item.href : pathname.startsWith(item.href);
           const Icon = item.icon;

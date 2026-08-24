@@ -7,18 +7,21 @@ export const metadata = { title: "Daftar" };
 export default function RegisterPage() {
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-50 px-4 py-12">
+      {/* Hiasan Latar Belakang Gradasi PLN */}
       <div className="absolute -top-20 right-0 h-72 w-72 rounded-full bg-[#FE8200] opacity-15 blur-3xl" />
       <div className="absolute bottom-0 left-0 h-72 w-72 rounded-full bg-[#0091B5] opacity-15 blur-3xl" />
 
+      {/* Kotak Register dengan Efek Kaca (Glassmorphism) */}
       <div className="relative z-10 w-full max-w-sm rounded-2xl border border-white/60 bg-white/80 p-6 shadow-2xl backdrop-blur-xl sm:p-8">
         <div className="mb-8 flex flex-col items-center text-center">
-          <div className="mb-5">
+          <div className="mb-6">
+            {/* Menggunakan Logo Vertikal (Portrait) Sesuai Nama Asli */}
             <Image
-              src="/6594c76535ef0-pln.png"
+              src="/PLN Logo - Colored - zonalogo.com.png"
               alt="Logo PLN"
-              width={48}
-              height={64}
-              className="h-14 w-auto object-contain drop-shadow-sm"
+              width={100}
+              height={120}
+              className="h-24 w-auto object-contain drop-shadow-sm"
               priority
             />
           </div>

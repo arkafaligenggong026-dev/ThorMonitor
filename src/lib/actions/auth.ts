@@ -48,12 +48,8 @@ export async function loginAction(
 
 /**
  * Registrasi akun baru. Membuat user di Supabase Auth sekaligus baris
- * profil (nip, nama_lengkap, role) — juga dijaga oleh trigger
+ * profil (nip, nama_lengkap, role, ulp) — juga dijaga oleh trigger
  * `handle_new_user` di database sebagai jaring pengaman.
- *
- * Catatan produksi: pada operasional nyata, pembuatan akun sebaiknya
- * dikontrol Supervisor/Admin, bukan pendaftaran publik. Halaman ini
- * dibuka untuk mempermudah uji coba ketiga peran.
  */
 export async function registerAction(
   _prevState: ActionResult | undefined,
@@ -64,21 +60,31 @@ export async function registerAction(
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
   const role = String(formData.get("role") ?? "") as Role;
+  
+  // Tangkap data ULP (Bisa null jika role bukan supervisor)
+  const ulp = formData.get("ulp") ? String(formData.get("ulp")) : null;
 
   if (!nip || !nama_lengkap || !email || !password || !role) {
     return { success: false, message: "Semua kolom wajib diisi." };
   }
+  
+  // Validasi khusus: Jika role adalah supervisor (Pegawai), ULP wajib diisi!
+  if (role === "supervisor" && !ulp) {
+    return { success: false, message: "Pegawai wajib memilih lokasi ULP." };
+  }
+
   if (password.length < 6) {
     return { success: false, message: "Kata sandi minimal 6 karakter." };
   }
 
   const supabase = await createClient();
 
+  // Simpan data pendaftaran ke Supabase Auth (metadata)
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
-      data: { nip, nama_lengkap, role },
+      data: { nip, nama_lengkap, role, ulp }, // ulp ikut diselipkan ke metadata
     },
   });
 
@@ -96,11 +102,18 @@ export async function registerAction(
     };
   }
 
-  // Jaring pengaman: pastikan baris profil ada meski trigger DB gagal.
+  // Jaring pengaman: pastikan baris profil masuk ke tabel `profiles` 
+  // termasuk kolom `ulp` yang baru kita buat.
   if (data.user) {
     await supabase
       .from("profiles")
-      .upsert({ id: data.user.id, nip, nama_lengkap, role }, { onConflict: "id" });
+      .upsert({ 
+        id: data.user.id, 
+        nip, 
+        nama_lengkap, 
+        role, 
+        ulp  // <-- ULP disimpan ke tabel profiles di sini
+      }, { onConflict: "id" });
   }
 
   revalidatePath("/", "layout");

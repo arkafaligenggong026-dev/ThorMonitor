@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import Link from "next/link";
 import { Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,8 +10,26 @@ import { Select } from "@/components/ui/select";
 import { registerAction } from "@/lib/actions/auth";
 import { ROLE_OPTIONS } from "@/lib/constants";
 
+// Daftar ULP sesuai wilayah kerja
+const ULP_OPTIONS = [
+  "ULP Manado Utara",
+  "ULP Manado Selatan",
+  "ULP Tomohon",
+  "ULP Tondano",
+  "ULP Airmadidi",
+  "ULP Bitung",
+  "ULP Ratahan",
+  "ULP Amurang",
+  "ULP Motoling",
+  "ULP Kawangkoan",
+  "ULP Paniki"
+];
+
 export function RegisterForm() {
   const [state, formAction, isPending] = useActionState(registerAction, undefined);
+  
+  // State untuk memantau role yang dipilih
+  const [selectedRole, setSelectedRole] = useState("");
 
   return (
     <>
@@ -21,36 +39,36 @@ export function RegisterForm() {
       >
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <Label htmlFor="nip" className="text-slate-700">NIP</Label>
-            <Input id="nip" name="nip" placeholder="1998xxxxxx" className="bg-white/50 transition-colors focus:bg-white" required />
+            <Label htmlFor="nip" className="text-slate-700 font-semibold">NIP</Label>
+            <Input id="nip" name="nip" placeholder="1998xxxxxx" className="bg-slate-50 transition-colors focus:bg-white" required />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="nama_lengkap" className="text-slate-700">Nama Lengkap</Label>
-            <Input id="nama_lengkap" name="nama_lengkap" placeholder="Nama Anda" className="bg-white/50 transition-colors focus:bg-white" required />
+            <Label htmlFor="nama_lengkap" className="text-slate-700 font-semibold">Nama Lengkap</Label>
+            <Input id="nama_lengkap" name="nama_lengkap" placeholder="Nama Anda" className="bg-slate-50 transition-colors focus:bg-white" required />
           </div>
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="email" className="text-slate-700">Email</Label>
+          <Label htmlFor="email" className="text-slate-700 font-semibold">Email</Label>
           <Input
             id="email"
             name="email"
             type="email"
             placeholder="nama@pln.co.id"
-            className="bg-white/50 transition-colors focus:bg-white"
+            className="bg-slate-50 transition-colors focus:bg-white"
             required
             autoComplete="email"
           />
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="password" className="text-slate-700">Kata Sandi</Label>
+          <Label htmlFor="password" className="text-slate-700 font-semibold">Kata Sandi</Label>
           <Input
             id="password"
             name="password"
             type="password"
             placeholder="Minimal 6 karakter"
-            className="bg-white/50 transition-colors focus:bg-white"
+            className="bg-slate-50 transition-colors focus:bg-white"
             minLength={6}
             required
             autoComplete="new-password"
@@ -58,8 +76,15 @@ export function RegisterForm() {
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="role" className="text-slate-700">Peran</Label>
-          <Select id="role" name="role" required defaultValue="" className="bg-white/50 transition-colors focus:bg-white">
+          <Label htmlFor="role" className="text-slate-700 font-semibold">Peran</Label>
+          <Select 
+            id="role" 
+            name="role" 
+            required 
+            value={selectedRole}
+            onChange={(e) => setSelectedRole(e.target.value)}
+            className="bg-slate-50 transition-colors focus:bg-white"
+          >
             <option value="" disabled>
               Pilih peran Anda
             </option>
@@ -70,6 +95,29 @@ export function RegisterForm() {
             ))}
           </Select>
         </div>
+
+        {/* Form ULP Muncul Otomatis JIKA Role == "supervisor" (Pegawai) */}
+        {selectedRole === "supervisor" && (
+          <div className="space-y-1.5 animate-in slide-in-from-top-2 fade-in duration-300">
+            <Label htmlFor="ulp" className="text-slate-700 font-semibold text-[#FE8200]">Pilih ULP</Label>
+            <Select 
+              id="ulp" 
+              name="ulp" 
+              required 
+              defaultValue="" 
+              className="bg-orange-50/50 border-orange-200 text-slate-800 transition-colors focus:bg-white"
+            >
+              <option value="" disabled>
+                Pilih lokasi ULP Anda
+              </option>
+              {ULP_OPTIONS.map((ulp) => (
+                <option key={ulp} value={ulp}>
+                  {ulp}
+                </option>
+              ))}
+            </Select>
+          </div>
+        )}
 
         {state && !state.success && state.message && (
           <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm font-medium text-red-700">
@@ -84,10 +132,12 @@ export function RegisterForm() {
           </div>
         )}
 
-        <Button type="submit" className="w-full border-0 bg-gradient-to-r from-[#0091B5] to-[#1E3A8A] text-white font-bold shadow-md hover:shadow-lg transition-all" size="lg" disabled={isPending}>
-          {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {isPending ? "Mendaftar..." : "Daftar Sekarang"}
-        </Button>
+        <div className="pt-2">
+          <Button type="submit" className="w-full border-0 bg-gradient-to-r from-[#0091B5] to-[#1E3A8A] text-white font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all" size="lg" disabled={isPending}>
+            {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {isPending ? "Mendaftar..." : "Daftar Sekarang"}
+          </Button>
+        </div>
       </form>
 
       <p className="mt-6 text-center text-sm font-medium text-slate-500">

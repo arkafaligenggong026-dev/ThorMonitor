@@ -6,13 +6,15 @@ export type Role = "tim_inspeksi" | "supervisor" | "tim_pemeliharaan";
 
 export type WoStatus = "open" | "assigned" | "in_progress" | "resolved" | "closed";
 
-export type Urgensi = "rendah" | "sedang" | "tinggi" | "kritis";
+// Tipe Urgensi diubah sesuai standar PLN
+export type Urgensi = "mendesak" | "prioritas_1" | "prioritas_2";
 
 export interface Profile {
   id: string;
   nip: string;
   nama_lengkap: string;
   role: Role;
+  ulp: string | null; // <-- Tambahkan baris ini
   created_at: string;
 }
 
@@ -39,6 +41,12 @@ export interface WorkOrder {
   resolved_at: string | null;
   closed_at: string | null;
   updated_at: string;
+  
+  // Kolom Tambahan Khusus QA & Inspeksi ROW
+  minggu_ke: number | null;
+  inspektor: string | null;
+  kms: string | null;
+  rencana_tindak: string | null;
 }
 
 export interface DashboardStats {
