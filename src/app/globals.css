@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  height: 100%;
+}
+
+* {
+  border-color: theme("colors.slate.200");
+}
+
+::selection {
+  background-color: theme("colors.primary.100");
+  color: theme("colors.primary.900");
+}
+
+/* Scrollbar tipis agar konsisten di seluruh browser berbasis Chromium */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background-color: theme("colors.slate.300");
+  border-radius: 9999px;
+}
+
+/* Popup Leaflet mengikuti bahasa desain aplikasi */
+.leaflet-popup-content-wrapper {
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.15);
+}
+.leaflet-popup-content {
+  margin: 0.75rem 1rem;
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-size: 0.8125rem;
+}
+.leaflet-container {
+  font-family: var(--font-inter), system-ui, sans-serif;
+}

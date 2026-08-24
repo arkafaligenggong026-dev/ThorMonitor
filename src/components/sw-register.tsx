@@ -1,0 +1,22 @@
+"use client";
+
+import { useEffect } from "react";
+
+/**
+ * NFR-3: Registrasi Service Worker untuk dukungan PWA/offline. Berjalan
+ * sekali di sisi klien setelah halaman selesai dimuat.
+ */
+export function ServiceWorkerRegister() {
+  useEffect(() => {
+    if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
+    if (process.env.NODE_ENV !== "production") return;
+
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("/sw.js").catch(() => {
+        // Gagal daftar SW tidak boleh menghentikan aplikasi berjalan normal.
+      });
+    });
+  }, []);
+
+  return null;
+}
