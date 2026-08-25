@@ -13,7 +13,6 @@ export const KATEGORI_WO = [
   "Lainnya",
 ] as const;
 
-// Pilihan Urgensi Baru
 export const URGENSI_OPTIONS: { value: Urgensi; label: string }[] = [
   { value: "mendesak", label: "Mendesak" },
   { value: "prioritas_1", label: "Prioritas 1" },
@@ -26,7 +25,6 @@ export const URGENSI_LABEL: Record<Urgensi, string> = {
   prioritas_2: "Prioritas 2",
 };
 
-// Warna Badge Urgensi
 export const URGENSI_COLOR: Record<Urgensi, string> = {
   mendesak: "bg-red-50 text-red-700 border-red-200",
   prioritas_1: "bg-orange-50 text-orange-700 border-orange-200",
@@ -57,26 +55,25 @@ export const STATUS_MARKER_COLOR: Record<WoStatus, string> = {
   closed: "#0D9488",
 };
 
-export const ROLE_LABEL = {
+// --- BAGIAN ROLE YANG BARU ---
+
+export const ROLE_LABEL: Record<Role, string> = {
   tim_inspeksi: "Tim Inspeksi",
-  supervisor: "Pegawai",
-  tim_pemeliharaan: "Tim Eksekusi"
+  supervisor: "Pegawai (Kantor)",
+  tim_rabas: "Tim Rabas (ROW)",
+  tim_har_jaringan: "Tim Har Jaringan",
+  tim_har_gardu: "Tim Har Gardu",
+  tim_pdkb: "Tim PDKB (Elit)"
 };
 
 export const ROLE_OPTIONS: { value: Role; label: string; deskripsi: string }[] = [
-  {
-    value: "tim_inspeksi",
-    label: "Tim Inspeksi",
-    deskripsi: "Melakukan inspeksi & melaporkan temuan di lapangan",
-  },
-  {
-    value: "supervisor",
-    label: "Pegawai",
-    deskripsi: "Meninjau laporan, menugaskan tim eksekusi, dan verifikasi",
-  },
-  {
-    value: "tim_pemeliharaan",
-    label: "Tim Eksekusi",
-    deskripsi: "Mengerjakan perbaikan di lokasi inspeksi",
-  },
+  { value: "tim_inspeksi", label: "Tim Inspeksi", deskripsi: "Patroli & laporkan anomali jaringan" },
+  { value: "supervisor", label: "Pegawai (Kantor)", deskripsi: "Verifikasi laporan QA & tugaskan WO" },
+  { value: "tim_rabas", label: "Tim Rabas (ROW)", deskripsi: "Yantek Khusus: Pemotongan Pohon" },
+  { value: "tim_har_jaringan", label: "Tim Har Jaringan", deskripsi: "Yantek Khusus: Perbaikan Tiang & Kabel" },
+  { value: "tim_har_gardu", label: "Tim Har Gardu", deskripsi: "Yantek Khusus: Perbaikan Komponen Trafo" },
+  { value: "tim_pdkb", label: "Tim PDKB", deskripsi: "Pasukan Elit: Eksekusi tanpa padam" },
 ];
+
+// Helper array untuk mengecek apakah user adalah bagian dari Tim Eksekusi
+export const EKSEKUSI_ROLES: Role[] = ["tim_rabas", "tim_har_jaringan", "tim_har_gardu", "tim_pdkb"];

@@ -1,12 +1,16 @@
 // Tipe data inti ThorMonitor. Nama field sengaja disamakan persis dengan
-// nama kolom di database (snake_case) supaya hasil query Supabase bisa
-// dipakai langsung tanpa mapping tambahan.
+// nama kolom di database (snake_case).
 
-export type Role = "tim_inspeksi" | "supervisor" | "tim_pemeliharaan";
+export type Role = 
+  | "tim_inspeksi" 
+  | "supervisor" 
+  | "tim_rabas" 
+  | "tim_har_jaringan" 
+  | "tim_har_gardu" 
+  | "tim_pdkb";
 
 export type WoStatus = "open" | "assigned" | "in_progress" | "resolved" | "closed";
 
-// Tipe Urgensi diubah sesuai standar PLN
 export type Urgensi = "mendesak" | "prioritas_1" | "prioritas_2";
 
 export interface Profile {
@@ -14,7 +18,7 @@ export interface Profile {
   nip: string;
   nama_lengkap: string;
   role: Role;
-  ulp: string | null; // <-- Tambahkan baris ini
+  ulp: string | null;
   created_at: string;
 }
 

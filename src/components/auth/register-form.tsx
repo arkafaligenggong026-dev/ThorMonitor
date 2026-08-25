@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { registerAction } from "@/lib/actions/auth";
-import { ROLE_OPTIONS } from "@/lib/constants";
 
 // Daftar ULP sesuai wilayah kerja
 const ULP_OPTIONS = [
@@ -28,8 +27,12 @@ const ULP_OPTIONS = [
 export function RegisterForm() {
   const [state, formAction, isPending] = useActionState(registerAction, undefined);
   
-  // State untuk memantau role yang dipilih
-  const [selectedRole, setSelectedRole] = useState("");
+  // State untuk memantau pilihan dropdown
+  const [mainRole, setMainRole] = useState(""); // Menyimpan pilihan utama (Inspeksi/Pegawai/Eksekusi)
+  const [subRole, setSubRole] = useState("");   // Menyimpan pilihan spesifik jika memilih Tim Eksekusi
+
+  // Trik Sulap: Menentukan role final yang akan dikirim ke database
+  const finalRole = mainRole === "tim_eksekusi" ? subRole : mainRole;
 
   return (
     <>
@@ -40,11 +43,11 @@ export function RegisterForm() {
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <Label htmlFor="nip" className="text-slate-700 font-semibold">NIP</Label>
-            <Input id="nip" name="nip" placeholder="1998xxxxxx" className="bg-slate-50 transition-colors focus:bg-white" required />
+            <Input id="nip" name="nip" placeholder="1998xxxxxx" className="bg-slate-50 transition-colors focus:bg-white" required disabled={isPending} />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="nama_lengkap" className="text-slate-700 font-semibold">Nama Lengkap</Label>
-            <Input id="nama_lengkap" name="nama_lengkap" placeholder="Nama Anda" className="bg-slate-50 transition-colors focus:bg-white" required />
+            <Input id="nama_lengkap" name="nama_lengkap" placeholder="Nama Anda" className="bg-slate-50 transition-colors focus:bg-white" required disabled={isPending} />
           </div>
         </div>
 
@@ -58,6 +61,7 @@ export function RegisterForm() {
             className="bg-slate-50 transition-colors focus:bg-white"
             required
             autoComplete="email"
+            disabled={isPending}
           />
         </div>
 
@@ -72,53 +76,76 @@ export function RegisterForm() {
             minLength={6}
             required
             autoComplete="new-password"
+            disabled={isPending}
           />
         </div>
 
+        {/* INPUT TERSEMBUNYI: Ini yang dibaca oleh database (auth.ts) */}
+        <input type="hidden" name="role" value={finalRole} />
+
+        {/* 1. DROPDOWN UTAMA (Hanya 3 Pilihan Bersih) */}
         <div className="space-y-1.5">
-          <Label htmlFor="role" className="text-slate-700 font-semibold">Peran</Label>
+          <Label htmlFor="main_role" className="text-slate-700 font-semibold">Peran</Label>
           <Select 
-            id="role" 
-            name="role" 
+            id="main_role" 
             required 
-            value={selectedRole}
-            onChange={(e) => setSelectedRole(e.target.value)}
+            value={mainRole}
+            onChange={(e) => {
+              setMainRole(e.target.value);
+              setSubRole(""); // Reset pilihan tim eksekusi jika ganti peran utama
+            }}
+            disabled={isPending}
             className="bg-slate-50 transition-colors focus:bg-white"
           >
-            <option value="" disabled>
-              Pilih peran Anda
-            </option>
-            {ROLE_OPTIONS.map((r) => (
-              <option key={r.value} value={r.value}>
-                {r.label}
-              </option>
-            ))}
+            <option value="" disabled>Pilih peran Anda</option>
+            <option value="tim_inspeksi">Tim Inspeksi</option>
+            <option value="supervisor">Pegawai (Kantor)</option>
+            <option value="tim_eksekusi">Tim Eksekusi (Lapangan)</option>
           </Select>
         </div>
 
-        {/* Form ULP Muncul Otomatis JIKA Role == "supervisor" (Pegawai) */}
-        {selectedRole === "supervisor" && (
+        {/* 2A. MUNCUL JIKA PILIH PEGAWAI: Dropdown ULP */}
+        {mainRole === "supervisor" && (
           <div className="space-y-1.5 animate-in slide-in-from-top-2 fade-in duration-300">
-            <Label htmlFor="ulp" className="text-slate-700 font-semibold text-[#FE8200]">Pilih ULP</Label>
+            <Label htmlFor="ulp" className="text-slate-700 font-semibold text-[#FE8200]">Pilih Wilayah ULP</Label>
             <Select 
               id="ulp" 
               name="ulp" 
               required 
               defaultValue="" 
-              className="bg-orange-50/50 border-orange-200 text-slate-800 transition-colors focus:bg-white"
+              disabled={isPending}
+              className="bg-orange-50/50 border-orange-200 text-slate-800 transition-colors focus:bg-white focus:border-[#FE8200]"
             >
-              <option value="" disabled>
-                Pilih lokasi ULP Anda
-              </option>
+              <option value="" disabled>Pilih lokasi ULP Anda...</option>
               {ULP_OPTIONS.map((ulp) => (
-                <option key={ulp} value={ulp}>
-                  {ulp}
-                </option>
+                <option key={ulp} value={ulp}>{ulp}</option>
               ))}
             </Select>
           </div>
         )}
 
+        {/* 2B. MUNCUL JIKA PILIH TIM EKSEKUSI: Dropdown Spesialisasi Tim */}
+        {mainRole === "tim_eksekusi" && (
+          <div className="space-y-1.5 animate-in slide-in-from-top-2 fade-in duration-300">
+            <Label htmlFor="sub_role" className="text-slate-700 font-semibold text-[#1E3A8A]">Pilih Spesialisasi Tim</Label>
+            <Select 
+              id="sub_role" 
+              required 
+              value={subRole}
+              onChange={(e) => setSubRole(e.target.value)}
+              disabled={isPending}
+              className="bg-blue-50/50 border-blue-200 text-slate-800 transition-colors focus:bg-white focus:border-[#1E3A8A]"
+            >
+              <option value="" disabled>Pilih spesialisasi tim Anda...</option>
+              <option value="tim_rabas">Tim Rabas (Khusus ROW)</option>
+              <option value="tim_har_jaringan">Tim Har Jaringan (Konstruksi/Tiang)</option>
+              <option value="tim_har_gardu">Tim Har Gardu (Komponen Trafo)</option>
+              <option value="tim_pdkb">Tim PDKB</option>
+            </Select>
+          </div>
+        )}
+
+        {/* Pesan Error / Sukses */}
         {state && !state.success && state.message && (
           <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm font-medium text-red-700">
             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />

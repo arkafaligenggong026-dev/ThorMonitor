@@ -57,18 +57,26 @@ export default function LandingPage() {
               {APP_NAME}
             </span>
           </div>
+
+          {/* Tombol Header Kanan Atas yang Kini Seimbang */}
           <div className="flex items-center gap-3">
             <Link href="/login">
-              <Button variant="ghost" className="font-medium text-slate-600 hover:text-[#0091B5]">
+              <Button 
+                variant="outline" 
+                className="border-slate-300 font-semibold text-slate-700 hover:bg-slate-100 hover:text-[#0091B5] transition-all"
+              >
                 Masuk
               </Button>
             </Link>
             <Link href="/register">
-              <Button className="border-0 bg-gradient-to-r from-[#0091B5] to-[#1E3A8A] font-semibold text-white shadow-lg transition-all hover:scale-105 hover:shadow-[#0091B5]/30">
+              <Button 
+                className="border-0 bg-gradient-to-r from-[#0091B5] to-[#1E3A8A] font-semibold text-white shadow-md transition-all hover:scale-105 hover:shadow-[#0091B5]/30"
+              >
                 Daftar
               </Button>
             </Link>
           </div>
+
         </div>
       </header>
 
@@ -95,19 +103,22 @@ export default function LandingPage() {
               alur kerja berbasis geotagging — dari temuan di lapangan hingga
               verifikasi perbaikan.
             </p>
-            <div className="flex flex-col justify-center gap-4 sm:flex-row">
-              <Link href="/register">
-                <Button size="lg" className="w-full sm:w-auto border-0 bg-gradient-to-r from-[#F8D90F] to-[#FE8200] text-slate-900 hover:text-white font-bold shadow-lg transition-transform hover:-translate-y-1 hover:shadow-[#FE8200]/40">
+            
+            {/* Tombol Aksi Utama */}
+            <div className="flex flex-col justify-center items-center gap-4 sm:flex-row">
+              <Link href="/register" className="w-full sm:w-auto">
+                <Button className="h-12 w-full sm:w-auto border-0 bg-gradient-to-r from-[#F8D90F] to-[#FE8200] px-8 text-base font-bold text-slate-900 shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#FE8200]/30">
                   Mulai Sekarang
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                  <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
-              <Link href="/login">
-                <Button size="lg" variant="outline" className="w-full sm:w-auto border-slate-300 text-slate-700 hover:bg-slate-100 font-semibold">
+              <Link href="/login" className="w-full sm:w-auto">
+                <Button variant="outline" className="h-12 w-full sm:w-auto border-2 border-slate-200 bg-white px-8 text-base font-bold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50">
                   Saya Sudah Punya Akun
                 </Button>
               </Link>
             </div>
+
           </div>
         </section>
 
