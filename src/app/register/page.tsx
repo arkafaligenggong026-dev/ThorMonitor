@@ -6,7 +6,16 @@ export const metadata = { title: "Daftar" };
 
 export default function RegisterPage() {
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-50 px-4 py-12">
+    <div 
+  className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-12"
+  style={{
+    backgroundImage: "url('/bg-batik-light.png')",
+    backgroundSize: "550px", // <-- Kunci zoom out-nya di sini (bisa diubah angkanya)
+    backgroundRepeat: "repeat", // <-- Memaksa gambar berulang seperti susunan ubin
+    backgroundColor: "rgba(248, 250, 252, 0.6)", 
+    backgroundBlendMode: "overlay"
+  }}
+>
       {/* Hiasan Latar Belakang Gradasi PLN */}
       <div className="absolute -top-20 right-0 h-72 w-72 rounded-full bg-[#FE8200] opacity-15 blur-3xl" />
       <div className="absolute bottom-0 left-0 h-72 w-72 rounded-full bg-[#0091B5] opacity-15 blur-3xl" />

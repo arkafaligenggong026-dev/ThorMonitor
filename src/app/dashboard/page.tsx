@@ -19,28 +19,45 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       
-      {/* Header Dashboard */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-slate-800 sm:text-4xl">
+      {/* Header Dashboard: Diubah menjadi Banner Eksklusif Navy */}
+      <div 
+        className="relative flex flex-col gap-4 overflow-hidden rounded-2xl p-6 shadow-xl sm:flex-row sm:items-center sm:justify-between sm:p-8 bg-slate-900"
+        style={{
+          backgroundImage: "url('/bg-batik-dark.png')",
+          backgroundSize: "1000px", // Menggunakan ukuran yang sudah Anda rasa pas sebelumnya
+          backgroundPosition: "center", // <-- KUNCI 1: Memaksa pola pas di tengah banner
+          backgroundRepeat: "repeat",
+          backgroundColor: "rgba(15, 23, 42, 0.3)", // <-- KUNCI 2: Dibuat jauh lebih transparan (0.3) agar batik muncul
+          // backgroundBlendMode: "overlay" <-- Baris ini DIHAPUS saja agar warnanya tidak redup
+        }}
+      >
+        {/* Dekorasi Cahaya Tambahan di Ujung Banner */}
+        <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-[#0091B5] opacity-20 blur-3xl" />
+        
+        <div className="relative z-10">
+          <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
             Halo,{" "}
-            <span className="bg-gradient-to-r from-[#0091B5] to-[#1E3A8A] bg-clip-text text-transparent">
+            {/* Nama user di-highlight dengan warna Kuning PLN */}
+            <span className="text-[#F8D90F]">
               {profile?.nama_lengkap.split(" ")[0]}
             </span>
             <span className="text-2xl sm:text-3xl"> 👋</span>
           </h1>
-          <p className="mt-2 text-sm font-medium text-slate-500 sm:text-base">
-            Ringkasan Work Order gangguan jaringan distribusi.
+          <p className="mt-2 text-sm font-medium text-slate-300 sm:text-base">
+            Ringkasan Work Order temuan dan anomali jaringan distribusi.
           </p>
         </div>
         
         {profile?.role === "tim_inspeksi" && (
-          <Link href="/dashboard/work-orders/baru" className="hidden sm:block">
-            <Button className="border-0 bg-gradient-to-r from-[#0091B5] to-[#1E3A8A] font-bold text-white shadow-lg transition-all hover:-translate-y-1 hover:shadow-[#0091B5]/40">
-              <Plus className="mr-2 h-5 w-5" />
-              Buat Laporan
-            </Button>
-          </Link>
+          <div className="relative z-10">
+            <Link href="/dashboard/work-orders/baru" className="hidden sm:block">
+              {/* Tombol diubah jadi Kuning-Oranye agar kontras dengan background Navy */}
+              <Button className="border-0 bg-gradient-to-r from-[#F8D90F] to-[#FE8200] font-bold text-slate-900 shadow-lg transition-all hover:-translate-y-1 hover:shadow-[#FE8200]/40">
+                <Plus className="mr-2 h-5 w-5" />
+                Buat Laporan
+              </Button>
+            </Link>
+          </div>
         )}
       </div>
 
@@ -73,7 +90,7 @@ export default async function DashboardPage() {
           href="/dashboard/work-orders/baru"
           className="fixed bottom-20 right-4 z-40 sm:hidden"
         >
-          <Button size="icon" className="h-14 w-14 rounded-full border-0 bg-gradient-to-r from-[#0091B5] to-[#1E3A8A] text-white shadow-xl transition-transform active:scale-95">
+          <Button size="icon" className="h-14 w-14 rounded-full border-0 bg-gradient-to-r from-[#F8D90F] to-[#FE8200] text-slate-900 shadow-xl transition-transform active:scale-95">
             <Plus className="h-6 w-6" />
           </Button>
         </Link>

@@ -5,8 +5,7 @@ export type Role =
   | "tim_inspeksi" 
   | "supervisor" 
   | "tim_rabas" 
-  | "tim_har_jaringan" 
-  | "tim_har_gardu" 
+  | "tim_pemeliharaan" 
   | "tim_pdkb";
 
 export type WoStatus = "open" | "assigned" | "in_progress" | "resolved" | "closed";

@@ -12,7 +12,16 @@ export default async function LoginPage({
   const { next } = await searchParams;
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-50 px-4 py-12">
+     <div 
+  className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-12"
+  style={{
+    backgroundImage: "url('/bg-batik-light.png')",
+    backgroundSize: "550px", // <-- Kunci zoom out-nya di sini (bisa diubah angkanya)
+    backgroundRepeat: "repeat", // <-- Memaksa gambar berulang seperti susunan ubin
+    backgroundColor: "rgba(248, 250, 252, 0.6)", 
+    backgroundBlendMode: "overlay"
+  }}
+>
       {/* Hiasan Latar Belakang Gradasi PLN */}
       <div className="absolute -left-20 -top-20 h-72 w-72 rounded-full bg-[#0091B5] opacity-20 blur-3xl" />
       <div className="absolute -bottom-20 -right-20 h-72 w-72 rounded-full bg-[#F8D90F] opacity-20 blur-3xl" />

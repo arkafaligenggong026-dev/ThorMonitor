@@ -2,6 +2,7 @@ import { getWorkOrders } from "@/lib/data";
 import { LeafletMap } from "@/components/map/leaflet-map";
 import { STATUS_MARKER_COLOR, STATUS_LABEL } from "@/lib/constants";
 import type { WoStatus } from "@/lib/types";
+import { PageHeader } from "@/components/layout/page-header";
 
 export const metadata = { title: "Peta Sebaran" };
 
@@ -30,18 +31,16 @@ export default async function PetaPage() {
 
   return (
     <div className="space-y-5">
-      <div>
-        <h1 className="text-xl font-bold text-ink sm:text-2xl">Peta Sebaran Gangguan</h1>
-        <p className="text-sm text-slate-500">
-          Lokasi seluruh Work Order berdasarkan titik geotagging.
-        </p>
-      </div>
+      <PageHeader 
+        title="Peta Sebaran Anomali" 
+        description="Lokasi seluruh Work Order berdasarkan titik geotagging lapangan."
+      />
 
-      <div className="flex flex-wrap gap-x-4 gap-y-2 rounded-lg border border-slate-200 bg-white px-4 py-3">
+      <div className="flex flex-wrap gap-x-4 gap-y-2 rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-sm">
         {(Object.keys(STATUS_LABEL) as WoStatus[]).map((s) => (
-          <div key={s} className="flex items-center gap-1.5 text-xs text-slate-600">
+          <div key={s} className="flex items-center gap-1.5 text-xs font-medium text-slate-600">
             <span
-              className="h-2.5 w-2.5 rounded-full"
+              className="h-3 w-3 rounded-full shadow-sm"
               style={{ backgroundColor: STATUS_MARKER_COLOR[s] }}
             />
             {STATUS_LABEL[s]}
@@ -49,7 +48,9 @@ export default async function PetaPage() {
         ))}
       </div>
 
-      <LeafletMap markers={markers} height="min(60vh, 520px)" />
+      <div className="overflow-hidden rounded-xl border border-slate-200 shadow-sm">
+        <LeafletMap markers={markers} height="min(60vh, 520px)" />
+      </div>
 
       {workOrders.length === 0 && (
         <p className="text-center text-sm text-slate-500">

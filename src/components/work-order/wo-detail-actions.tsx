@@ -31,10 +31,11 @@ import {
 } from "@/lib/actions/work-orders";
 import type { ActionResult, Profile, Role, WorkOrder, WoStatus } from "@/lib/types";
 
+// PERBAIKAN: Mengubah kata "Tim Pemeliharaan" menjadi "Tim Eksekutor" agar masuk akal untuk semua tim
 const PESAN_STATUS: Record<WoStatus, string> = {
-  open: "Menunggu ditugaskan oleh Supervisor.",
-  assigned: "Sudah ditugaskan, menunggu Tim Pemeliharaan memulai pekerjaan.",
-  in_progress: "Sedang dikerjakan oleh Tim Pemeliharaan.",
+  open: "Menunggu ditugaskan oleh Pegawai.",
+  assigned: "Sudah ditugaskan, menunggu Tim Eksekutor memulai pekerjaan.",
+  in_progress: "Sedang dikerjakan oleh Tim Eksekutor.",
   resolved: "Menunggu verifikasi hasil kerja oleh Supervisor.",
   closed: "Work Order telah diverifikasi dan ditutup.",
 };
@@ -43,7 +44,8 @@ export function WoDetailActions({
   wo,
   currentUserId,
   currentUserRole,
-  timPemeliharaanOptions,
+  // Prop ini tetap pakai nama lama agar tidak error dengan page.tsx, tapi isinya sudah dinamis (bisa Rabas/Pemeliharaan)
+  timPemeliharaanOptions: opsiEksekutor, 
 }: {
   wo: WorkOrder;
   currentUserId: string;
@@ -55,7 +57,7 @@ export function WoDetailActions({
   const [error, setError] = useState<string | null>(null);
 
   const [assignOpen, setAssignOpen] = useState(false);
-  const [selectedTeknisi, setSelectedTeknisi] = useState(timPemeliharaanOptions[0]?.id ?? "");
+  const [selectedTeknisi, setSelectedTeknisi] = useState(opsiEksekutor[0]?.id ?? "");
 
   const [resolveOpen, setResolveOpen] = useState(false);
   const [fotoAfter, setFotoAfter] = useState<string | null>(null);
@@ -80,38 +82,53 @@ export function WoDetailActions({
     <p className="rounded-lg border border-red-200 bg-red-50 p-2.5 text-sm text-red-700">{error}</p>
   ) : null;
 
-  // --- Supervisor: tugaskan WO berstatus "open" (FR-2.4) ---
+  // LOGIKA DINAMIS: Cek apakah ini WO tipe ROW atau bukan
+  const isRow = wo.kategori === "ROW";
+  const labelTim = isRow ? "Tim Rabas (Khusus ROW)" : "Tim Pemeliharaan";
+  const labelPendek = isRow ? "Tim Rabas" : "Tim Pemeliharaan";
+
+  // LOGIKA DINAMIS: Cek apakah user yang login ini orang lapangan (bisa rabas/pemeliharaan)
+  const isEksekutorLapangan = ["tim_pemeliharaan", "tim_rabas", "tim_pdkb"].includes(currentUserRole);
+
+  // --- Supervisor: tugaskan WO berstatus "open" ---
   if (currentUserRole === "supervisor" && wo.status === "open") {
     return (
       <div className="space-y-3">
         {errorBox}
         <Dialog open={assignOpen} onOpenChange={setAssignOpen}>
           <DialogTrigger asChild>
-            <Button className="w-full" size="lg">
-              <UserPlus className="h-4 w-4" />
-              Tugaskan ke Tim Pemeliharaan
+            <Button 
+              className={`w-full h-12 text-base font-bold text-white rounded-xl shadow-lg transition-all active:scale-[0.98] ${
+                isRow 
+                  ? "bg-[#0091B5] hover:bg-[#007A99] shadow-[#0091B5]/30" 
+                  : "bg-[#FE8200] hover:bg-[#E07300] shadow-[#FE8200]/30"
+              }`}
+            >
+              <UserPlus className="mr-2 h-5 w-5" />
+              Tugaskan ke {labelTim}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Tugaskan Work Order</DialogTitle>
               <DialogDescription>
-                Pilih anggota Tim Pemeliharaan untuk menangani {wo.nomor_wo}.
+                Pilih anggota {labelPendek} untuk menangani {wo.nomor_wo}.
               </DialogDescription>
             </DialogHeader>
-            {timPemeliharaanOptions.length === 0 ? (
-              <p className="text-sm text-slate-500">
-                Belum ada akun dengan peran Tim Pemeliharaan yang terdaftar.
+            {opsiEksekutor.length === 0 ? (
+              <p className="text-sm text-slate-500 bg-slate-50 border border-slate-200 p-4 rounded-lg text-center">
+                Belum ada akun dengan peran <strong>{labelPendek}</strong> yang terdaftar.
               </p>
             ) : (
               <div className="space-y-4">
                 <div>
-                  <Label>Anggota Tim Pemeliharaan</Label>
+                  <Label>Pilih Anggota {labelPendek}</Label>
                   <Select
                     value={selectedTeknisi}
                     onChange={(e) => setSelectedTeknisi(e.target.value)}
+                    className="mt-1"
                   >
-                    {timPemeliharaanOptions.map((p) => (
+                    {opsiEksekutor.map((p) => (
                       <option key={p.id} value={p.id}>
                         {p.nama_lengkap} ({p.nip})
                       </option>
@@ -119,7 +136,7 @@ export function WoDetailActions({
                   </Select>
                 </div>
                 <Button
-                  className="w-full"
+                  className="w-full h-11 font-bold bg-[#0091B5] hover:bg-[#007A99]"
                   disabled={isPending}
                   onClick={() =>
                     jalankan(
@@ -128,7 +145,7 @@ export function WoDetailActions({
                     )
                   }
                 >
-                  {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+                  {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Konfirmasi Penugasan
                 </Button>
               </div>
@@ -139,9 +156,9 @@ export function WoDetailActions({
     );
   }
 
-  // --- Tim Pemeliharaan: mulai kerjakan WO yang ditugaskan ---
+  // --- Tim Eksekutor (Rabas/Pemeliharaan): mulai kerjakan WO yang ditugaskan ---
   if (
-    currentUserRole === "tim_pemeliharaan" &&
+    isEksekutorLapangan &&
     wo.status === "assigned" &&
     wo.ditugaskan_ke === currentUserId
   ) {
@@ -149,15 +166,14 @@ export function WoDetailActions({
       <div className="space-y-3">
         {errorBox}
         <Button
-          className="w-full"
-          size="lg"
+          className="w-full h-12 text-base font-bold bg-[#0091B5] hover:bg-[#007A99] text-white rounded-xl shadow-[0_4px_15px_rgba(0,145,181,0.3)] transition-all active:scale-[0.98]"
           disabled={isPending}
           onClick={() => jalankan(() => startWorkOrder(wo.id))}
         >
           {isPending ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
           ) : (
-            <PlayCircle className="h-4 w-4" />
+            <PlayCircle className="mr-2 h-5 w-5" />
           )}
           Mulai Kerjakan
         </Button>
@@ -165,9 +181,9 @@ export function WoDetailActions({
     );
   }
 
-  // --- Tim Pemeliharaan: selesaikan WO yang sedang dikerjakan (FR-2.5) ---
+  // --- Tim Eksekutor (Rabas/Pemeliharaan): selesaikan WO yang sedang dikerjakan ---
   if (
-    currentUserRole === "tim_pemeliharaan" &&
+    isEksekutorLapangan &&
     wo.status === "in_progress" &&
     wo.ditugaskan_ke === currentUserId
   ) {
@@ -182,8 +198,8 @@ export function WoDetailActions({
         )}
         <Dialog open={resolveOpen} onOpenChange={setResolveOpen}>
           <DialogTrigger asChild>
-            <Button className="w-full" size="lg" variant="success">
-              <CheckCircle2 className="h-4 w-4" />
+            <Button className="w-full h-12 text-base font-bold text-white rounded-xl shadow-[0_4px_15px_rgba(16,185,129,0.3)] transition-all active:scale-[0.98]" variant="success">
+              <CheckCircle2 className="mr-2 h-5 w-5" />
               Selesaikan Pekerjaan
             </Button>
           </DialogTrigger>
@@ -202,7 +218,7 @@ export function WoDetailActions({
                 onChange={setFotoAfter}
               />
               <Button
-                className="w-full"
+                className="w-full h-11 font-bold"
                 variant="success"
                 disabled={isPending || !fotoAfter}
                 onClick={() =>
@@ -212,7 +228,7 @@ export function WoDetailActions({
                   )
                 }
               >
-                {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+                {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Kirim & Selesaikan
               </Button>
             </div>
@@ -230,39 +246,41 @@ export function WoDetailActions({
         <div className="grid grid-cols-2 gap-3">
           <Button
             variant="success"
+            className="h-11 font-bold shadow-md"
             disabled={isPending}
             onClick={() => jalankan(() => verifyWorkOrder(wo.id, true))}
           >
             {isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
-              <ThumbsUp className="h-4 w-4" />
+              <ThumbsUp className="mr-2 h-4 w-4" />
             )}
-            Setujui &amp; Tutup
+            Setujui & Tutup
           </Button>
           <Dialog open={rejectOpen} onOpenChange={setRejectOpen}>
             <DialogTrigger asChild>
-              <Button variant="destructive">
-                <ThumbsDown className="h-4 w-4" />
+              <Button variant="destructive" className="h-11 font-bold shadow-md">
+                <ThumbsDown className="mr-2 h-4 w-4" />
                 Tolak / Revisi
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Tolak &amp; Minta Revisi</DialogTitle>
+                <DialogTitle>Tolak & Minta Revisi</DialogTitle>
                 <DialogDescription>
                   Jelaskan bagian yang belum sesuai standar operasional untuk {wo.nomor_wo}.
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4">
                 <Textarea
-                  placeholder="Contoh: sambungan kabel belum rapi, mohon diperbaiki ulang."
+                  placeholder="Contoh: pemotongan dahan belum bersih, mohon diperbaiki ulang."
                   value={catatan}
                   onChange={(e) => setCatatan(e.target.value)}
+                  className="min-h-[100px]"
                 />
                 <Button
                   variant="destructive"
-                  className="w-full"
+                  className="w-full h-11 font-bold"
                   disabled={isPending || !catatan.trim()}
                   onClick={() =>
                     jalankan(
@@ -271,7 +289,7 @@ export function WoDetailActions({
                     )
                   }
                 >
-                  {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+                  {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Kirim Revisi
                 </Button>
               </div>
@@ -284,7 +302,7 @@ export function WoDetailActions({
 
   // --- Tidak ada aksi untuk kombinasi peran/status ini ---
   return (
-    <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600">
+    <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-4 text-center text-sm font-medium text-slate-500 shadow-inner">
       {PESAN_STATUS[wo.status]}
     </div>
   );

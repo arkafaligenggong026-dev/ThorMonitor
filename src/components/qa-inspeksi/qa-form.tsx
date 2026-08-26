@@ -23,7 +23,10 @@ export function QaForm() {
   const [mingguKe, setMingguKe] = useState("");
   const [inspektor, setInspektor] = useState(INSPEKTOR_OPTIONS[0]);
   const [kms, setKms] = useState("");
-  const [rencanaTindak, setRencanaTindak] = useState(""); // Sekarang ini akan menyimpan format tanggal (YYYY-MM-DD)
+  const [rencanaTindak, setRencanaTindak] = useState("");
+  
+  // LOGIKA BARU: Jenis Kegiatan otomatis menyesuaikan pilihan Inspektor (Derived State)
+  const jenisKegiatan = inspektor === "MULP" ? "QA (Quality Assurance)" : "Inspeksi Management";
   
   // State Bawaan
   const [namaPenyulang, setNamaPenyulang] = useState("");
@@ -81,7 +84,7 @@ export function QaForm() {
         minggu_ke: mKe,
         inspektor,
         kms: kms.trim(),
-        rencana_tindak: rencanaTindak, // Tanggal yang dikirim
+        rencana_tindak: rencanaTindak,
         nama_penyulang: namaPenyulang.trim(),
         urgensi,
         latitude: lokasi.lat,
@@ -138,7 +141,18 @@ export function QaForm() {
         </Select>
       </div>
 
-      {/* 3. KMS */}
+      {/* 3. Jenis Kegiatan (Otomatis & Read-Only) */}
+      <div className="space-y-1.5 animate-in fade-in zoom-in-95 duration-300">
+        <Label htmlFor="jenisKegiatan" className="text-slate-700 font-semibold">Jenis Kegiatan <span className="text-xs text-[#FE8200] font-normal"></span></Label>
+        <Input
+          id="jenisKegiatan"
+          value={jenisKegiatan}
+          readOnly
+          className="bg-slate-100 text-slate-600 font-bold border-slate-200 cursor-not-allowed select-none focus:ring-0"
+        />
+      </div>
+
+      {/* 4. KMS */}
       <div className="space-y-1.5">
         <Label htmlFor="kms" className="text-slate-700 font-semibold">KMS</Label>
         <Input
@@ -151,7 +165,7 @@ export function QaForm() {
         />
       </div>
 
-      {/* 4. Rencana Tindak (Diubah jadi Kalender) */}
+      {/* 5. Rencana Tindak (Diubah jadi Kalender) */}
       <div className="space-y-1.5">
         <Label htmlFor="rencanaTindak" className="text-slate-700 font-semibold">Tanggal Rencana Tindak</Label>
         <Input
@@ -164,7 +178,7 @@ export function QaForm() {
         />
       </div>
 
-      {/* 5. Nama Penyulang & Section */}
+      {/* 6. Nama Penyulang & Section */}
       <div className="space-y-1.5">
         <Label htmlFor="penyulang" className="text-slate-700 font-semibold">Nama Penyulang dan Section</Label>
         <Input
@@ -177,7 +191,7 @@ export function QaForm() {
         />
       </div>
 
-      {/* 6. Urgensi */}
+      {/* 7. Urgensi */}
       <div className="space-y-1.5">
         <Label htmlFor="urgensi" className="text-slate-700 font-semibold">Urgensi</Label>
         <Select
@@ -193,7 +207,7 @@ export function QaForm() {
         </Select>
       </div>
 
-      {/* 7. Titik Koordinat */}
+      {/* 8. Titik Koordinat */}
       <div className="space-y-1.5">
         <Label className="text-slate-700 font-semibold">Titik Koordinat (Geotagging)</Label>
         <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-4 transition-all">
@@ -228,7 +242,7 @@ export function QaForm() {
         </div>
       </div>
 
-      {/* 8. Foto Before */}
+      {/* 9. Foto Before */}
       <div className="pt-2">
         <PhotoUpload
           label="Foto Kondisi Awal (Before)"

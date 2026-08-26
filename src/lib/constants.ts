@@ -55,14 +55,13 @@ export const STATUS_MARKER_COLOR: Record<WoStatus, string> = {
   closed: "#0D9488",
 };
 
-// --- BAGIAN ROLE YANG BARU ---
+// --- BAGIAN ROLE ---
 
 export const ROLE_LABEL: Record<Role, string> = {
   tim_inspeksi: "Tim Inspeksi",
   supervisor: "Pegawai (Kantor)",
   tim_rabas: "Tim Rabas (ROW)",
-  tim_har_jaringan: "Tim Har Jaringan",
-  tim_har_gardu: "Tim Har Gardu",
+  tim_pemeliharaan: "Tim Pemeliharaan",
   tim_pdkb: "Tim PDKB (Elit)"
 };
 
@@ -70,10 +69,9 @@ export const ROLE_OPTIONS: { value: Role; label: string; deskripsi: string }[] =
   { value: "tim_inspeksi", label: "Tim Inspeksi", deskripsi: "Patroli & laporkan anomali jaringan" },
   { value: "supervisor", label: "Pegawai (Kantor)", deskripsi: "Verifikasi laporan QA & tugaskan WO" },
   { value: "tim_rabas", label: "Tim Rabas (ROW)", deskripsi: "Yantek Khusus: Pemotongan Pohon" },
-  { value: "tim_har_jaringan", label: "Tim Har Jaringan", deskripsi: "Yantek Khusus: Perbaikan Tiang & Kabel" },
-  { value: "tim_har_gardu", label: "Tim Har Gardu", deskripsi: "Yantek Khusus: Perbaikan Komponen Trafo" },
-  { value: "tim_pdkb", label: "Tim PDKB", deskripsi: "Pasukan Elit: Eksekusi tanpa padam" },
+  { value: "tim_pemeliharaan", label: "Tim Pemeliharaan", deskripsi: "Yantek Khusus: Konstruksi, Tiang, Gardu & Trafo" },
+  { value: "tim_pdkb", label: "Tim PDKB", deskripsi: "" },
 ];
 
 // Helper array untuk mengecek apakah user adalah bagian dari Tim Eksekusi
-export const EKSEKUSI_ROLES: Role[] = ["tim_rabas", "tim_har_jaringan", "tim_har_gardu", "tim_pdkb"];
+export const EKSEKUSI_ROLES: Role[] = ["tim_rabas", "tim_pemeliharaan", "tim_pdkb"];
