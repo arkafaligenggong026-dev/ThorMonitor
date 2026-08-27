@@ -50,6 +50,8 @@ export interface WorkOrder {
   inspektor: string | null;
   kms: string | null;
   rencana_tindak: string | null;
+
+  asal_kantor: string | null;
 }
 
 export interface DashboardStats {

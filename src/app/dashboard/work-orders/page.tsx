@@ -13,12 +13,28 @@ export const metadata = { title: "Work Order" };
 const TAB_STATUSES: WoStatus[] = ["open", "assigned", "in_progress", "resolved", "closed"];
 
 export default async function WorkOrdersPage() {
-  const [workOrders, { profile }] = await Promise.all([
+  const [rawWorkOrders, { profile }] = await Promise.all([
     getWorkOrders(),
     getCurrentUserAndProfile(),
   ]);
 
-  // 🔥 LOGIKA PEMISAH: Memisahkan WO biasa dan QA ROW
+  // 🔥 1. LOGIKA GEOFENCING KETAT (KANTOR ASAL)
+  // Menghindari jebakan null === null dari data lama
+  const isPusat = profile?.ulp === "UP3 Manado";
+  const allWorkOrders = isPusat 
+    ? rawWorkOrders 
+    : rawWorkOrders.filter((w) => 
+        w.asal_kantor && 
+        profile?.ulp && 
+        w.asal_kantor === profile.ulp
+      );
+
+  // 🔥 2. LOGIKA HAK AKSES QA & ROW
+  const canSeeQA = profile?.role === "supervisor" || profile?.role === "tim_rabas";
+  const workOrders = canSeeQA 
+    ? allWorkOrders 
+    : allWorkOrders.filter((w) => w.kategori !== "ROW");
+
   const regulerOrders = workOrders.filter((w) => w.kategori !== "ROW");
   const qaOrders = workOrders.filter((w) => w.kategori === "ROW");
 
@@ -28,7 +44,6 @@ export default async function WorkOrdersPage() {
         title="Work Order" 
         description="Daftar seluruh laporan temuan dan anomali jaringan distribusi."
         action={
-          // Tombol buat laporan WO HANYA untuk Tim Inspeksi
           profile?.role === "tim_inspeksi" ? (
             <Link href="/dashboard/work-orders/baru" className="hidden sm:block">
               <Button className="border-0 bg-gradient-to-r from-[#F8D90F] to-[#FE8200] font-bold text-slate-900 shadow-lg transition-all hover:-translate-y-1 hover:shadow-[#FE8200]/40">
@@ -42,17 +57,19 @@ export default async function WorkOrdersPage() {
 
       <Tabs defaultValue="semua">
         <div className="overflow-x-auto pb-1 scrollbar-hide">
-          {/* Ditambahkan min-w-max agar tab tidak terpotong saat digeser di HP */}
           <TabsList className="min-w-max">
             <TabsTrigger value="semua">Semua ({workOrders.length})</TabsTrigger>
             
-            {/* 🌟 TAB PEMISAH BARU (Diletakkan di antara Semua dan Menunggu) */}
-            <TabsTrigger value="wo_reguler" className="font-semibold text-sky-600 data-[state=active]:text-sky-700">
-              WO Reguler ({regulerOrders.length})
-            </TabsTrigger>
-            <TabsTrigger value="qa" className="font-semibold text-orange-600 data-[state=active]:text-orange-700">
-              QA & ROW ({qaOrders.length})
-            </TabsTrigger>
+            {canSeeQA && (
+              <>
+                <TabsTrigger value="wo_reguler" className="font-semibold text-sky-600 data-[state=active]:text-sky-700">
+                  WO Reguler ({regulerOrders.length})
+                </TabsTrigger>
+                <TabsTrigger value="qa" className="font-semibold text-orange-600 data-[state=active]:text-orange-700">
+                  QA & ROW ({qaOrders.length})
+                </TabsTrigger>
+              </>
+            )}
 
             {TAB_STATUSES.map((s) => (
               <TabsTrigger key={s} value={s}>
@@ -62,20 +79,15 @@ export default async function WorkOrdersPage() {
           </TabsList>
         </div>
 
-        {/* Konten Tab Semua */}
-        <TabsContent value="semua">
-          <DaftarWo items={workOrders} />
-        </TabsContent>
+        <TabsContent value="semua"><DaftarWo items={workOrders} /></TabsContent>
         
-        {/* 🌟 Konten Tab Pemisah Baru */}
-        <TabsContent value="wo_reguler">
-          <DaftarWo items={regulerOrders} />
-        </TabsContent>
-        <TabsContent value="qa">
-          <DaftarWo items={qaOrders} />
-        </TabsContent>
+        {canSeeQA && (
+          <>
+            <TabsContent value="wo_reguler"><DaftarWo items={regulerOrders} /></TabsContent>
+            <TabsContent value="qa"><DaftarWo items={qaOrders} /></TabsContent>
+          </>
+        )}
 
-        {/* Konten Tab Status */}
         {TAB_STATUSES.map((s) => (
           <TabsContent key={s} value={s}>
             <DaftarWo items={workOrders.filter((w) => w.status === s)} />

@@ -1,35 +1,46 @@
 import Link from "next/link";
 import Image from "next/image";
-import { getWorkOrders } from "@/lib/data";
+import { getWorkOrders, getCurrentUserAndProfile } from "@/lib/data"; 
 import { Card } from "@/components/ui/card";
 import { StatusBadge } from "@/components/work-order/badges";
 import { formatTanggalSingkat } from "@/lib/utils";
 import { ExportButton } from "@/components/work-order/export-button";
 import { PageHeader } from "@/components/layout/page-header";
-import { DateFilter } from "@/components/date-filter"; // 🔥 Import komponen filter
+import { DateFilter } from "@/components/date-filter";
 
 export const metadata = { title: "Riwayat" };
 
-// 🔥 Tambahkan searchParams untuk menangkap tanggal dari URL
 export default async function RiwayatPage({ searchParams }: { searchParams: Promise<{ from?: string; to?: string }> }) {
   const params = await searchParams;
   const fromDate = params.from;
   const toDate = params.to;
 
-  const workOrders = await getWorkOrders();
-  let selesai = workOrders.filter((w) => w.status === "closed" || w.status === "resolved");
+  const [rawWorkOrders, { profile }] = await Promise.all([
+    getWorkOrders(),
+    getCurrentUserAndProfile(),
+  ]);
 
-  // 🔥 LOGIKA FILTER TANGGAL SEBELUM DI-EXPORT
+  // 🔥 FILTER KANTOR KETAT (GEOFENCING)
+  const isPusat = profile?.ulp === "UP3 Manado";
+  const allOrders = isPusat 
+    ? rawWorkOrders 
+    : rawWorkOrders.filter((w) => 
+        w.asal_kantor && 
+        profile?.ulp && 
+        w.asal_kantor === profile.ulp
+      );
+
+  let selesai = allOrders.filter((w) => w.status === "closed" || w.status === "resolved");
+
+  // FILTER TANGGAL
   if (fromDate) {
     const start = new Date(fromDate);
-    start.setHours(0, 0, 0, 0); // Mulai dari jam 00:00:00
+    start.setHours(0, 0, 0, 0);
 
-    // Jika "Sampai Tanggal" kosong, filter hanya 1 hari (sama dengan "Mulai Tanggal")
     const end = toDate ? new Date(toDate) : new Date(fromDate);
-    end.setHours(23, 59, 59, 999); // Sampai jam 23:59:59
+    end.setHours(23, 59, 59, 999);
 
     selesai = selesai.filter((wo) => {
-      // Gunakan tanggal selesai (resolved_at atau closed_at)
       const dateString = wo.closed_at || wo.resolved_at || wo.created_at;
       if (!dateString) return false;
       const woDate = new Date(dateString);
@@ -37,7 +48,6 @@ export default async function RiwayatPage({ searchParams }: { searchParams: Prom
     });
   }
 
-  // Memetakan data (yang sudah tersaring) untuk diekspor ke Excel
   const exportData = selesai.map((wo) => ({
     id: wo.nomor_wo || wo.id,
     kategori: wo.kategori || "-",
@@ -61,7 +71,6 @@ export default async function RiwayatPage({ searchParams }: { searchParams: Prom
         }
       />
 
-      {/* Tampilkan Komponen Filter */}
       <DateFilter />
 
       {selesai.length === 0 ? (

@@ -45,10 +45,10 @@ export default function LandingPage() {
 
         {/* Judul Raksasa */}
         <h1 className="mx-auto max-w-5xl text-3xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl xl:text-7xl drop-shadow-lg leading-tight animate-in fade-in slide-in-from-bottom-5 duration-700 delay-100">
-          Manajemen Work Order, <br className="hidden sm:block" />
-          QA, dan Inspeksi <br className="hidden sm:block" />
+          Manajemen Work Order Jaringan Distribusi, <br className="hidden sm:block" />
+          Quality Assurance,  <br className="hidden sm:block" />
           <span className="text-[#F8D90F] drop-shadow-[0_2px_15px_rgba(248,217,15,0.4)]">
-            Jaringan Distribusi
+            dan Inspeksi Management
           </span>
         </h1>
 

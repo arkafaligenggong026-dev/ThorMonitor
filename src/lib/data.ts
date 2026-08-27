@@ -18,14 +18,46 @@ export async function getCurrentUserAndProfile() {
   return { user, profile: profile ?? null };
 }
 
+// 🔥 FUNGSI INI SEKARANG JADI SUPER PINTAR (GEOFENCING + ROLE FILTER)
 export async function getWorkOrders(): Promise<WorkOrder[]> {
   const supabase = await createClient();
+  
+  const { data: { user } } = await supabase.auth.getUser();
+  
   const { data } = await supabase
     .from("work_orders")
     .select("*")
     .order("created_at", { ascending: false });
 
-  return (data as WorkOrder[]) ?? [];
+  let allOrders = (data as WorkOrder[]) ?? [];
+
+  if (user) {
+    // 🌟 PERBAIKAN: Sekarang kita narik "ulp" DAN "role" sekaligus
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("ulp, role")
+      .eq("id", user.id)
+      .single();
+
+    if (profile) {
+      // 1. LOGIKA GEOFENCING (KANTOR)
+      // Jika BUKAN orang UP3 Manado (Induk), saring data khusus ULP dia saja.
+      if (profile.ulp !== "UP3 Manado") {
+        allOrders = allOrders.filter(
+          (w) => w.asal_kantor && w.asal_kantor === profile.ulp
+        );
+      }
+
+      // 2. LOGIKA HAK AKSES QA & ROW (ROLE)
+      // Jika BUKAN Pegawai dan BUKAN Tim Rabas, sembunyikan semua laporan QA/ROW!
+      const canSeeQA = profile.role === "supervisor" || profile.role === "tim_rabas";
+      if (!canSeeQA) {
+        allOrders = allOrders.filter((w) => w.kategori !== "ROW");
+      }
+    }
+  }
+
+  return allOrders;
 }
 
 export async function getWorkOrder(id: string): Promise<WorkOrder | null> {

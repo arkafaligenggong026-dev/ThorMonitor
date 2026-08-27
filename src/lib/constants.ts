@@ -70,7 +70,7 @@ export const ROLE_OPTIONS: { value: Role; label: string; deskripsi: string }[] =
   { value: "supervisor", label: "Pegawai (Kantor)", deskripsi: "Verifikasi laporan QA & tugaskan WO" },
   { value: "tim_rabas", label: "Tim Rabas (ROW)", deskripsi: "Yantek Khusus: Pemotongan Pohon" },
   { value: "tim_pemeliharaan", label: "Tim Pemeliharaan", deskripsi: "Yantek Khusus: Konstruksi, Tiang, Gardu & Trafo" },
-  { value: "tim_pdkb", label: "Tim PDKB", deskripsi: "" },
+  { value: "tim_pdkb", label: "Tim PDKB", deskripsi: "Pasukan Elit: Eksekusi tanpa padam" },
 ];
 
 // Helper array untuk mengecek apakah user adalah bagian dari Tim Eksekusi

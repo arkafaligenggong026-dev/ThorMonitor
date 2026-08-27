@@ -5,30 +5,37 @@ import { WoCard } from "@/components/work-order/wo-card";
 import { Button } from "@/components/ui/button";
 import { ExportQaButton } from "@/components/qa-inspeksi/export-qa-button";
 import { PageHeader } from "@/components/layout/page-header";
-import { DateFilter } from "@/components/date-filter"; // 🔥 Import komponen filter
+import { DateFilter } from "@/components/date-filter"; 
 
 export const metadata = { title: "QA & Inspeksi Management" };
 
-// 🔥 Tambahkan searchParams
 export default async function QaInspeksiPage({ searchParams }: { searchParams: Promise<{ from?: string; to?: string }> }) {
   const params = await searchParams;
   const fromDate = params.from;
   const toDate = params.to;
 
-  const [{ profile }, workOrders] = await Promise.all([
+  const [{ profile }, rawWorkOrders] = await Promise.all([
     getCurrentUserAndProfile(),
     getWorkOrders(),
   ]);
 
-  // Filter awal untuk mengambil QA (Kategori ROW) 
-  // Ditambah filter tambahan agar hanya mengekspor QA yang sudah selesai
-  let qaOrders = workOrders.filter(wo => 
+  // 🔥 FILTER KANTOR KETAT (GEOFENCING)
+  const isPusat = profile?.ulp === "UP3 Manado";
+  const allOrders = isPusat 
+    ? rawWorkOrders 
+    : rawWorkOrders.filter((w) => 
+        w.asal_kantor && 
+        profile?.ulp && 
+        w.asal_kantor === profile.ulp
+      );
+
+  let qaOrders = allOrders.filter(wo => 
     wo.kategori === "ROW" && 
     wo.minggu_ke !== null &&
-    (wo.status === "resolved" || wo.status === "closed") // Opsional: Hanya QA yang sudah selesai
+    (wo.status === "resolved" || wo.status === "closed") 
   );
 
-  // 🔥 LOGIKA FILTER TANGGAL SEBELUM DI-EXPORT
+  // FILTER TANGGAL
   if (fromDate) {
     const start = new Date(fromDate);
     start.setHours(0, 0, 0, 0);
@@ -66,7 +73,6 @@ export default async function QaInspeksiPage({ searchParams }: { searchParams: P
         }
       />
 
-      {/* Tampilkan Komponen Filter */}
       <DateFilter />
 
       <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm sm:p-6">
