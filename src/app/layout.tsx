@@ -7,24 +7,16 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
 
 export const metadata: Metadata = {
-  title: {
-    default: `${APP_NAME} — Work Order PLN`,
-    template: `%s | ${APP_NAME}`,
-  },
-  description: APP_DESCRIPTION,
-  manifest: "/manifest.webmanifest",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "default",
-    title: APP_NAME,
-  },
+  title: APP_NAME || "ThorMonitor",
+  description: APP_DESCRIPTION || "Manajemen Work Order Jaringan Distribusi",
+  manifest: "/manifest.json", // 🔥 INI YANG BIKIN JADI APLIKASI PWA
 };
 
 export const viewport: Viewport = {
+  themeColor: "#0A192F", // 🔥 WARNA BAR ATAS HP BIAR SENADA SAMA APLIKASI
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  themeColor: "#00A2E9",
+  maximumScale: 1, // Mencegah zoom in otomatis pas ngetik di HP
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -1,0 +1,25 @@
+{
+  "name": "ThorMonitor - PLN",
+  "short_name": "ThorMonitor",
+  "description": "Sistem Manajemen Work Order dan Inspeksi Jaringan Distribusi",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0A192F",
+  "theme_color": "#0091B5",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

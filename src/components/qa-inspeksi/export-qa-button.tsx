@@ -6,6 +6,22 @@ import { Button } from "@/components/ui/button";
 import ExcelJS from "exceljs";
 import type { WorkOrder } from "@/lib/types";
 
+// 🔥 TAMBAHAN: Import Capacitor untuk File System & Share
+import { Capacitor } from '@capacitor/core';
+import { Filesystem, Directory } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
+
+// 🔥 Fungsi pembantu untuk ngubah data mentah Excel jadi Base64
+function arrayBufferToBase64(buffer: ArrayBuffer) {
+  let binary = '';
+  const bytes = new Uint8Array(buffer);
+  const len = bytes.byteLength;
+  for (let i = 0; i < len; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return window.btoa(binary);
+}
+
 export function ExportQaButton({ data }: { data: WorkOrder[] }) {
   const [isExporting, setIsExporting] = useState(false);
 
@@ -85,19 +101,44 @@ export function ExportQaButton({ data }: { data: WorkOrder[] }) {
       }
 
       const buffer = await workbook.xlsx.writeBuffer();
-      const fileBlob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-      const url = URL.createObjectURL(fileBlob);
-      const link = document.createElement("a");
       const dateStr = new Date().toISOString().split("T")[0];
+      const fileName = `Laporan_QA_ROW_${dateStr}.xlsx`;
 
-      link.setAttribute("href", url);
-      link.setAttribute("download", `Laporan_QA_ROW_${dateStr}.xlsx`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      // 🔥 LOGIKA HYBRID CAPACITOR VS WEB
+      if (Capacitor.isNativePlatform()) {
+        // 📱 Skenario HP Android (APK)
+        const base64Data = arrayBufferToBase64(buffer as ArrayBuffer);
+        
+        // Simpan ke Cache HP
+        const savedFile = await Filesystem.writeFile({
+          path: fileName,
+          data: base64Data,
+          directory: Directory.Cache,
+        });
+
+        // Buka Pop-up Share/Buka File Android
+        await Share.share({
+          title: fileName,
+          url: savedFile.uri,
+          dialogTitle: 'Buka atau Bagikan Laporan QA',
+        });
+
+      } else {
+        // 💻 Skenario Web/Laptop Biasa
+        const fileBlob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+        const url = URL.createObjectURL(fileBlob);
+        const link = document.createElement("a");
+        
+        link.setAttribute("href", url);
+        link.setAttribute("download", fileName);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }
 
     } catch (error) {
+      console.error("Gagal export excel QA:", error);
       alert("Terjadi kesalahan saat mengekspor Excel QA.");
     } finally {
       setIsExporting(false);

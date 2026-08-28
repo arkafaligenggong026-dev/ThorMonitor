@@ -14,6 +14,10 @@ import { reverseGeocode } from "@/lib/utils";
 import { createWorkOrder } from "@/lib/actions/work-orders";
 import type { Urgensi } from "@/lib/types";
 
+// 🔥 TAMBAHAN: Import Capacitor untuk sensor GPS Native di HP
+import { Geolocation } from '@capacitor/geolocation';
+import { Capacitor } from '@capacitor/core';
+
 // Opsi pilihan disesuaikan dengan bahasa Inspeksi
 const JENIS_INSPEKSI_OPTIONS = [
   "Inspeksi Konstruksi",
@@ -38,27 +42,54 @@ export function WoForm() {
 
   const [error, setError] = useState<string | null>(null);
 
-  function ambilLokasi() {
-    if (typeof navigator === "undefined" || !navigator.geolocation) {
-      setLocError("Perangkat/browser ini tidak mendukung GPS.");
-      return;
-    }
+  // 🔥 FUNGSI GPS HYBRID (SUPPORT CAPACITOR & BROWSER)
+  async function ambilLokasi() {
     setLocating(true);
     setLocError(null);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-        setLokasi({ lat, lng });
-        setLocating(false);
-        reverseGeocode(lat, lng).then(setAlamat);
-      },
-      () => {
-        setLocError("Gagal mengambil lokasi. Pastikan izin GPS diaktifkan pada browser.");
-        setLocating(false);
-      },
-      { enableHighAccuracy: true, timeout: 15000 }
-    );
+
+    try {
+      let lat: number;
+      let lng: number;
+
+      if (Capacitor.isNativePlatform()) {
+        // 📱 BERJALAN DI APLIKASI ANDROID (APK)
+        const check = await Geolocation.checkPermissions();
+        if (check.location !== 'granted') {
+          const req = await Geolocation.requestPermissions();
+          if (req.location !== 'granted') {
+            throw new Error("Izin lokasi ditolak oleh pengguna.");
+          }
+        }
+        const pos = await Geolocation.getCurrentPosition({ enableHighAccuracy: true });
+        lat = pos.coords.latitude;
+        lng = pos.coords.longitude;
+      } else {
+        // 💻 BERJALAN DI BROWSER / LAPTOP
+        if (typeof navigator === "undefined" || !navigator.geolocation) {
+          throw new Error("Perangkat/browser ini tidak mendukung GPS.");
+        }
+        const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, { 
+            enableHighAccuracy: true, 
+            timeout: 15000 
+          });
+        });
+        lat = pos.coords.latitude;
+        lng = pos.coords.longitude;
+      }
+
+      setLokasi({ lat, lng });
+      
+      // Ambil teks alamat dari koordinat
+      const alamatResult = await reverseGeocode(lat, lng);
+      setAlamat(alamatResult);
+
+    } catch (err: any) {
+      console.error("Gagal mengambil lokasi:", err);
+      setLocError(err.message || "Gagal mengambil lokasi. Pastikan GPS diaktifkan.");
+    } finally {
+      setLocating(false);
+    }
   }
 
   function handleSubmit(e: React.FormEvent) {
