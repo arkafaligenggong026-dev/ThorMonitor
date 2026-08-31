@@ -1,8 +1,10 @@
 import { getWorkOrders } from "@/lib/data";
-import { LeafletMap } from "@/components/map/leaflet-map";
 import { STATUS_MARKER_COLOR, STATUS_LABEL } from "@/lib/constants";
 import type { WoStatus } from "@/lib/types";
 import { PageHeader } from "@/components/layout/page-header";
+
+// 🔥 IMPORT KOMPONEN FILTER YANG BARU KITA BUAT
+import { MapWithFilter } from "@/components/map/map-with-filter"; 
 
 export const metadata = { title: "Peta Sebaran" };
 
@@ -22,6 +24,7 @@ export default async function PetaPage() {
     lat: wo.latitude,
     lng: wo.longitude,
     color: STATUS_MARKER_COLOR[wo.status],
+    status: wo.status, // 🔥 WAJIB DITAMBAHKAN AGAR FILTER BERJALAN
     popupHtml: `<div style="font-weight:600;margin-bottom:2px">${escapeHtml(
       wo.nomor_wo
     )}</div><div style="margin-bottom:4px">${escapeHtml(
@@ -36,6 +39,7 @@ export default async function PetaPage() {
         description="Lokasi seluruh Work Order berdasarkan titik geotagging lapangan."
       />
 
+      {/* KOTAK LEGEND WARNA (Dipertahankan agar user tahu arti warna marker) */}
       <div className="flex flex-wrap gap-x-4 gap-y-2 rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-sm">
         {(Object.keys(STATUS_LABEL) as WoStatus[]).map((s) => (
           <div key={s} className="flex items-center gap-1.5 text-xs font-medium text-slate-600">
@@ -48,15 +52,15 @@ export default async function PetaPage() {
         ))}
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-slate-200 shadow-sm">
-        <LeafletMap markers={markers} height="min(60vh, 520px)" />
-      </div>
-
-      {workOrders.length === 0 && (
+      {/* RENDER FILTER DAN PETA JIKA DATA ADA */}
+      {workOrders.length === 0 ? (
         <p className="text-center text-sm text-slate-500">
           Belum ada Work Order untuk ditampilkan di peta.
         </p>
+      ) : (
+        <MapWithFilter initialMarkers={markers} />
       )}
+      
     </div>
   );
 }
